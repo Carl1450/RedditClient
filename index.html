@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Multi-lane Reddit Client</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "bg-main": "#020617",
+                        "bg-panel": "#020617",
+                    },
+                },
+            },
+        };
+    </script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+    <header class="flex flex-wrap items-center gap-3 p-4 border-b border-slate-800 bg-slate-900/80 backdrop-blur">
+        <h1 class="text-lg font-semibold tracking-tight">
+            Multi-Lane Reddit Client
+        </h1>
+
+        <form id="add-lane-form" class="flex gap-2">
+            <input
+                type="text"
+                id="subreddit-input"
+                placeholder="Enter subreddit (e.g. javascript)"
+                required
+                class="px-3 py-1.5 rounded-md bg-slate-800 border border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+            <button 
+                type="submit"
+                class="px-3 py-1.5 rounded-md text-sm font-medium bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 transition"
+            >
+                Add lane    
+            </button>
+        </form>
+    </header>
+
+    <main
+        id="lanes-container"
+        class="flex gap-4 p-4 overflow-x-auto"
+    >
+        <!-- Lanes are added by JS -->
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
