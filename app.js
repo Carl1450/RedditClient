@@ -1,4 +1,4 @@
-const BASE_URL = "https://www.reddit.com/r";
+const BASE_URL = "https://corsproxy.io/?https://www.reddit.com/r";
 
 document.getElementById("add-lane-form").addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -37,11 +37,19 @@ function createLaneElement(subreddit) {
                 r/${subreddit}
             </span>
         </div>
-        <button
-            class="remove-lane-btn text-xs px-2 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300"
-        >
+        <div class="flex items-center gap-2">
+            <select class="sort-dropdown text-xs px-2 py-1 rounded-md bg-slate-800 text-slate-300">
+                <option value="hot">Hot</option>
+                <option value="new">New</option>
+                <option value="top">Top</option>
+                <option value="best">Best</option>
+            </select>
+            <button
+                class="remove-lane-btn text-xs px-2 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300"
+            >
             X
-        </button>
+            </button>
+        </div>
     </header>
     <div class="lane-status text-xs text-slate-400 mb-2"></div>
     <div class="lane-posts flex flex-col gap-2 text-sm"></div>
@@ -49,6 +57,11 @@ function createLaneElement(subreddit) {
 
     laneEl.querySelector(".remove-lane-btn").addEventListener("click", () => {
         laneEl.remove();
+    });
+
+    laneEl.querySelector(".sort-dropdown").addEventListener("change", (event) => {
+        const sort = event.target.value;
+        loadLane(laneEl, subreddit, sort);
     });
 
     return laneEl;
@@ -106,11 +119,11 @@ function setLaneStatus(laneElement, message, isError = false) {
         (isError ? "text-red-400" : "text-slate-400");
 }
 
-async function loadLane(laneElement, subreddit) {
-    setLaneStatus(laneElement, `Loading posts from r/${subreddit}...`);
+async function loadLane(laneElement, subreddit, sort = "hot") {
+    setLaneStatus(laneElement, `Loading ${sort} posts from r/${subreddit}...`);
 
     try {
-        const posts = await fetchSubredditPosts(subreddit);
+        const posts = await fetchSubredditPosts(subreddit, sort);
         renderLanePosts(laneElement, posts);
         setLaneStatus(laneElement, `Loaded ${posts.length} posts`);
     } catch (err) {
@@ -119,8 +132,8 @@ async function loadLane(laneElement, subreddit) {
     }
 }
 
-async function fetchSubredditPosts(subreddit) {
-    const url = `${BASE_URL}/${encodeURIComponent(subreddit)}.json`;
+async function fetchSubredditPosts(subreddit, sort = "hot") {
+    const url = `${BASE_URL}/${encodeURIComponent(subreddit)}/${sort}.json`;
     const response = await fetch(url);
 
     if (!response.ok) {
