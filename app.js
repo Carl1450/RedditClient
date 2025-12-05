@@ -44,6 +44,14 @@ function createLaneElement(subreddit) {
                 <option value="top">Top</option>
                 <option value="best">Best</option>
             </select>
+            <select class="time-dropdown text-xs px-2 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300" disabled>
+                <option value="hour">Now</option>
+                <option value="day">Today</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+                <option value="year">This Year</option>
+                <option value="all">All Time</option>
+            </select>
             <button
                 class="remove-lane-btn text-xs px-2 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300"
             >
@@ -59,9 +67,24 @@ function createLaneElement(subreddit) {
         laneEl.remove();
     });
 
-    laneEl.querySelector(".sort-dropdown").addEventListener("change", (event) => {
+    const sortDropdown = laneEl.querySelector(".sort-dropdown");
+    const timeDropdown = laneEl.querySelector(".time-dropdown");
+
+    sortDropdown.addEventListener("change", (event) => {
         const sort = event.target.value;
-        loadLane(laneEl, subreddit, sort);
+        if (sort === "top" || sort === "controversial") {
+            timeDropdown.disabled = false;
+        } else {
+            timeDropdown.disabled = true;
+        }
+        const time = timeDropdown.value;
+        loadLane(laneEl, subreddit, sort, time);
+    });
+
+    timeDropdown.addEventListener("change", (event) => {
+        const sort = sortDropdown.value;
+        const time = event.target.value;
+        loadLane(laneEl, subreddit, sort, time);
     });
 
     return laneEl;
@@ -119,7 +142,7 @@ function setLaneStatus(laneElement, message, isError = false) {
         (isError ? "text-red-400" : "text-slate-400");
 }
 
-async function loadLane(laneElement, subreddit, sort = "hot") {
+async function loadLane(laneElement, subreddit, sort = "hot", time = "all") {
     setLaneStatus(laneElement, `Loading ${sort} posts from r/${subreddit}...`);
 
     try {
@@ -132,8 +155,13 @@ async function loadLane(laneElement, subreddit, sort = "hot") {
     }
 }
 
-async function fetchSubredditPosts(subreddit, sort = "hot") {
+async function fetchSubredditPosts(subreddit, sort = "hot", time = "all") {
     const url = `${BASE_URL}/${encodeURIComponent(subreddit)}/${sort}.json`;
+
+    if (sort === "top" || sort === "controversial") {
+        url += `?t=${time}`;
+    }
+
     const response = await fetch(url);
 
     if (!response.ok) {
